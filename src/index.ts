@@ -43,6 +43,8 @@ async function processEmail(payload: InboundEmailPayload): Promise<DesignRequest
   const parsed = await parseEmail(payload.text || payload.subject);
   const existing = await findExisting(payload);
 
+  const senderName = payload.from.match(/^([^<]+)/)?.[1]?.trim() || parsed.clientName || 'Client';
+
   let req: DesignRequest;
 
   if (existing) {
@@ -54,11 +56,10 @@ async function processEmail(payload: InboundEmailPayload): Promise<DesignRequest
       budgetRange: parsed.budgetRange || existing.budgetRange,
       originalMessage: existing.originalMessage + '\n---\n' + (payload.text || ''),
       threadId: payload.threadId || existing.threadId,
-      clientName: existing.clientName,
     })!;
     console.log(`[Reply] Updated existing request ${existing.id} from ${payload.from}`);
   } else {
-    req = createRequest(payload.from, parsed.clientName, payload.text);
+    req = createRequest(payload.from, senderName, payload.text);
     updateRequest(req.id, {
       what: parsed.what,
       purpose: parsed.purpose,

@@ -95,28 +95,33 @@ export async function parseEmail(text: string): Promise<ParsedEmail> {
     return keywordParseEmail(text);
   }
 
-  const response = await getGroq().chat.completions.create({
-    model: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile',
-    messages: [
-      { role: 'system', content: SYSTEM_PROMPT },
-      { role: 'user', content: text },
-    ],
-    response_format: { type: 'json_object' },
-    temperature: 0.1,
-  });
+  try {
+    const response = await getGroq().chat.completions.create({
+      model: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile',
+      messages: [
+        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'user', content: text },
+      ],
+      response_format: { type: 'json_object' },
+      temperature: 0.1,
+    });
 
-  const content = response.choices[0]?.message?.content;
-  if (!content) throw new Error('No response from OpenAI');
+    const content = response.choices[0]?.message?.content;
+    if (!content) return keywordParseEmail(text);
 
-  const parsed = JSON.parse(content) as ParsedEmail;
-  return {
-    clientName: parsed.clientName || 'Client',
-    what: parsed.what || null,
-    purpose: parsed.purpose || null,
-    deadline: parsed.deadline || null,
-    brandReferences: parsed.brandReferences || null,
-    budgetRange: parsed.budgetRange || null,
-  };
+    const parsed = JSON.parse(content) as ParsedEmail;
+    return {
+      clientName: parsed.clientName || 'Client',
+      what: parsed.what || null,
+      purpose: parsed.purpose || null,
+      deadline: parsed.deadline || null,
+      brandReferences: parsed.brandReferences || null,
+      budgetRange: parsed.budgetRange || null,
+    };
+  } catch (err) {
+    console.warn('[Groq] API request failed, falling back to keyword parser:', err);
+    return keywordParseEmail(text);
+  }
 }
 
 export function getMissingFields(parsed: ParsedEmail): string[] {

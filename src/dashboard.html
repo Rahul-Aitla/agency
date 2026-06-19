@@ -8,73 +8,142 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; color: #333; padding: 24px; }
   .container { max-width: 1200px; margin: 0 auto; }
+
   header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
   h1 { font-size: 24px; color: #111; }
-  .stats { display: flex; gap: 16px; margin-bottom: 24px; }
-  .stat-card { background: white; border-radius: 8px; padding: 16px 20px; flex: 1; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-  .stat-card .number { font-size: 28px; font-weight: 700; }
-  .stat-card .label { font-size: 13px; color: #666; margin-top: 4px; }
+  .nav { display: flex; gap: 8px; align-items: center; }
+  .nav a, .nav button { padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; }
+  .nav a { background: #111; color: #fff; border: none; }
+  .nav a:hover { background: #333; }
+  .nav button { background: #fff; color: #333; border: 1px solid #ddd; }
+  .nav button:hover { background: #eee; }
+
+  /* Stats */
+  .stats { display: flex; gap: 12px; margin-bottom: 24px; }
+  .stat-card { background: #fff; border-radius: 10px; padding: 18px 20px; flex: 1; box-shadow: 0 1px 3px rgba(0,0,0,0.08); display: flex; align-items: center; gap: 14px; }
+  .stat-card .icon { font-size: 24px; }
+  .stat-card .info { flex: 1; }
+  .stat-card .number { font-size: 26px; font-weight: 700; line-height: 1.2; }
+  .stat-card .label { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
   .stat-card.pending .number { color: #f59e0b; }
   .stat-card.ready .number { color: #3b82f6; }
   .stat-card.routed .number { color: #10b981; }
   .stat-card.total .number { color: #111; }
-  .filters { display: flex; gap: 8px; margin-bottom: 16px; }
-  .filters button { padding: 6px 14px; border: 1px solid #ddd; background: white; border-radius: 6px; cursor: pointer; font-size: 13px; }
-  .filters button.active { background: #111; color: white; border-color: #111; }
+
+  /* Content layout */
+  .content-grid { display: flex; gap: 24px; }
+  .main-area { flex: 1; min-width: 0; }
+  .sidebar { width: 320px; flex-shrink: 0; }
+
+  /* Filters */
+  .filters { display: flex; gap: 6px; margin-bottom: 12px; }
+  .filters button { padding: 6px 14px; border: 1px solid #ddd; background: #fff; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 500; }
+  .filters button.active { background: #111; color: #fff; border-color: #111; }
   .filters button:hover:not(.active) { background: #eee; }
-  table { width: 100%; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-  th, td { text-align: left; padding: 12px 16px; border-bottom: 1px solid #eee; font-size: 14px; }
-  th { background: #fafafa; font-weight: 600; color: #555; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* Table */
+  table { width: 100%; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid #f0f0f0; font-size: 13px; }
+  th { background: #fafafa; font-weight: 600; color: #666; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 14px; }
+  tr:last-child td { border-bottom: none; }
   tr:hover td { background: #fafafa; }
-  .status { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
-  .status.pending_info { background: #fef3c7; color: #92400e; }
-  .status.ready { background: #dbeafe; color: #1e40af; }
-  .status.routed { background: #d1fae5; color: #065f46; }
-  .missing { color: #dc2626; font-size: 12px; }
-  .present { color: #16a34a; }
-  .refresh-btn { padding: 8px 16px; background: #111; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; }
-  .refresh-btn:hover { background: #333; }
-  .empty { text-align: center; padding: 48px; color: #888; }
+
+  /* Status badges */
+  .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; }
+  .badge.pending_info { background: #fef3c7; color: #92400e; }
+  .badge.ready { background: #dbeafe; color: #1e40af; }
+  .badge.routed { background: #d1fae5; color: #065f46; }
+
+  /* Workflow status */
+  .workflow-flow { display: flex; align-items: center; gap: 6px; margin: 6px 0 2px; }
+  .workflow-flow .step { font-size: 11px; color: #aaa; display: flex; align-items: center; gap: 3px; }
+  .workflow-flow .step.active { color: #333; font-weight: 600; }
+  .workflow-flow .arrow { color: #ddd; font-size: 11px; }
+
+  /* Detail panel */
   .detail-row { cursor: pointer; }
-  .detail-panel { display: none; background: #fafafa; padding: 16px; border-bottom: 1px solid #eee; font-size: 13px; }
+  .detail-panel { display: none; }
   .detail-panel.open { display: table-row; }
-  .detail-panel td { padding: 16px; }
-  .detail-panel pre { background: white; padding: 12px; border-radius: 4px; overflow-x: auto; font-size: 12px; max-height: 200px; }
-  .detail-panel .field { margin-bottom: 8px; }
-  .detail-panel .field strong { display: inline-block; width: 140px; color: #555; }
+  .detail-panel td { background: #fafafa; padding: 16px; }
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+  .detail-field { padding: 10px; background: #fff; border-radius: 6px; border: 1px solid #eee; }
+  .detail-field .dl { font-size: 10px; text-transform: uppercase; color: #999; letter-spacing: 0.5px; margin-bottom: 2px; }
+  .detail-field .dv { font-size: 13px; color: #333; }
+  .detail-field .dv.missing { color: #f59e0b; font-style: italic; }
+  .detail-msg { background: #fff; border-radius: 6px; border: 1px solid #eee; padding: 12px; font-size: 12px; color: #555; max-height: 120px; overflow-y: auto; white-space: pre-wrap; font-family: inherit; }
+
+  /* Missing chips */
+  .chips { display: flex; flex-wrap: wrap; gap: 4px; }
+  .chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+  .chip.warn { background: #fef3c7; color: #92400e; }
+  .chip.ok { background: #d1fae5; color: #065f46; }
+
+  /* Empty */
+  .empty { text-align: center; padding: 48px; color: #999; font-size: 14px; }
+
+  /* Activity timeline */
+  .timeline-card { background: #fff; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); padding: 20px; }
+  .timeline-card h3 { font-size: 14px; color: #111; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .timeline { position: relative; }
+  .timeline::before { content: ''; position: absolute; left: 9px; top: 4px; bottom: 4px; width: 2px; background: #eee; }
+  .tl-item { display: flex; gap: 12px; margin-bottom: 14px; position: relative; }
+  .tl-item:last-child { margin-bottom: 0; }
+  .tl-dot { width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; position: relative; z-index: 1; }
+  .tl-dot.blue { background: #dbeafe; color: #3b82f6; }
+  .tl-dot.orange { background: #fef3c7; color: #f59e0b; }
+  .tl-dot.green { background: #d1fae5; color: #10b981; }
+  .tl-dot.gray { background: #f0f0f0; color: #999; }
+  .tl-content { flex: 1; min-width: 0; }
+  .tl-content .tl-text { font-size: 13px; color: #333; }
+  .tl-content .tl-time { font-size: 11px; color: #999; }
+
+  .tl-empty { color: #999; font-size: 13px; text-align: center; padding: 24px; }
+
+  .expand-btn { color: #3b82f6; background: none; border: none; cursor: pointer; font-size: 12px; font-weight: 600; padding: 2px 0; }
+  .expand-btn:hover { text-decoration: underline; }
 </style>
 </head>
 <body>
 <div class="container">
   <header>
-    <h1>📋 Agency Bot</h1>
-    <div style="display:flex;gap:8px;">
-      <a href="/demo" style="padding:8px 16px;background:#1a1a2e;color:#60a5fa;border:1px solid #2a2a3e;border-radius:6px;text-decoration:none;font-size:13px;">⚙️ How It Works</a>
-      <button class="refresh-btn" onclick="load()">↻ Refresh</button>
+    <h1>Agency Bot</h1>
+    <div class="nav">
+      <a href="/demo">+ New Request</a>
+      <button onclick="load()">Refresh</button>
     </div>
   </header>
 
   <div class="stats" id="stats"></div>
-  <div class="filters" id="filters">
-    <button class="active" data-filter="all" onclick="setFilter('all')">All</button>
-    <button data-filter="pending_info" onclick="setFilter('pending_info')">Pending Info</button>
-    <button data-filter="ready" onclick="setFilter('ready')">Ready</button>
-    <button data-filter="routed" onclick="setFilter('routed')">Routed</button>
+
+  <div class="content-grid">
+    <div class="main-area">
+      <div class="filters" id="filters">
+        <button class="active" data-filter="all" onclick="setFilter('all')">All</button>
+        <button data-filter="pending_info" onclick="setFilter('pending_info')">Pending Info</button>
+        <button data-filter="ready" onclick="setFilter('ready')">Ready</button>
+        <button data-filter="routed" onclick="setFilter('routed')">Routed</button>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Client</th>
+            <th>Status</th>
+            <th>Workflow</th>
+            <th>Assigned</th>
+            <th>Created</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+
+    <div class="sidebar">
+      <div class="timeline-card" id="timelineCard">
+        <h3>Recent Activity</h3>
+        <div class="timeline" id="timeline"></div>
+      </div>
+    </div>
   </div>
-  <table>
-    <thead>
-      <tr>
-        <th>Client</th>
-        <th>What</th>
-        <th>Purpose</th>
-        <th>Deadline</th>
-        <th>Budget</th>
-        <th>Status</th>
-        <th>Assigned</th>
-      </tr>
-    </thead>
-    <tbody id="tbody"></tbody>
-  </table>
 </div>
 
 <script>
@@ -93,16 +162,30 @@ async function load() {
   allRequests = data.requests || [];
   renderStats(data.stats);
   render();
+  renderTimeline();
 }
 
 function renderStats(stats) {
   if (!stats) return;
   document.getElementById('stats').innerHTML = `
-    <div class="stat-card total"><div class="number">${stats.total}</div><div class="label">Total Requests</div></div>
-    <div class="stat-card pending"><div class="number">${stats.pending}</div><div class="label">Pending Info</div></div>
-    <div class="stat-card ready"><div class="number">${stats.ready}</div><div class="label">Ready to Route</div></div>
-    <div class="stat-card routed"><div class="number">${stats.routed}</div><div class="label">Routed</div></div>
+    <div class="stat-card total"><div class="icon">📨</div><div class="info"><div class="number">${stats.total}</div><div class="label">Total Requests</div></div></div>
+    <div class="stat-card pending"><div class="icon">⏳</div><div class="info"><div class="number">${stats.pending}</div><div class="label">Pending Info</div></div></div>
+    <div class="stat-card ready"><div class="icon">✅</div><div class="info"><div class="number">${stats.ready}</div><div class="label">Ready</div></div></div>
+    <div class="stat-card routed"><div class="icon">🚀</div><div class="info"><div class="number">${stats.routed}</div><div class="label">Routed</div></div></div>
   `;
+}
+
+function workflowSteps(r) {
+  const received = true;
+  const waiting = r.status === 'pending_info';
+  const ready = r.status === 'ready' || r.status === 'routed';
+  const assigned = r.status === 'routed';
+  return [
+    { label: 'Received', active: received },
+    { label: 'Waiting', active: waiting || ready || assigned },
+    { label: 'Ready', active: ready || assigned },
+    { label: assigned ? r.assignedTo || 'Assigned' : 'Assigned', active: assigned },
+  ];
 }
 
 function render() {
@@ -110,35 +193,92 @@ function render() {
   const tbody = document.getElementById('tbody');
 
   if (filtered.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" class="empty">No requests yet — connect Gmail via Google Apps Script to start</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" class="empty">No requests yet — submit one from the form</td></tr>';
     return;
   }
 
-  tbody.innerHTML = filtered.map(r => `
+  tbody.innerHTML = filtered.map(r => {
+    const steps = workflowSteps(r);
+    return `
     <tr class="detail-row" onclick="toggleDetail('${r.id}')">
-      <td>${esc(r.clientName)}<br><small style="color:#888">${esc(r.clientEmail)}</small></td>
-      <td>${r.what ? esc(r.what) : '<span class="missing">—</span>'}</td>
-      <td>${r.purpose ? esc(r.purpose) : '<span class="missing">—</span>'}</td>
-      <td>${r.deadline ? esc(r.deadline) : '<span class="missing">—</span>'}</td>
-      <td>${r.budgetRange ? esc(r.budgetRange) : '<span class="missing">—</span>'}</td>
-      <td><span class="status ${r.status}">${r.status.replace('_', ' ')}</span></td>
+      <td><strong>${esc(r.clientName)}</strong><br><small style="color:#888;font-size:11px;">${esc(r.clientEmail)}</small></td>
+      <td><span class="badge ${r.status}">${r.status === 'pending_info' ? 'Pending Info' : r.status === 'ready' ? 'Ready' : 'Routed'}</span></td>
+      <td>
+        <div class="workflow-flow">
+          ${steps.map((s, i) => `
+            <span class="step ${s.active ? 'active' : ''}">${s.active ? '●' : '○'} ${s.label}</span>
+            ${i < steps.length - 1 ? '<span class="arrow">→</span>' : ''}
+          `).join('')}
+        </div>
+      </td>
       <td>${r.assignedTo || '—'}</td>
+      <td style="font-size:12px;color:#888;">${new Date(r.createdAt).toLocaleDateString()}<br>${new Date(r.createdAt).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</td>
     </tr>
     <tr class="detail-panel" id="detail-${r.id}">
-      <td colspan="7">
-        <div class="field"><strong>Brand references:</strong> ${r.brandReferences ? esc(r.brandReferences) : '<span class="missing">—</span>'}</div>
-        <div class="field"><strong>Missing fields:</strong> ${r.missingFields.length ? r.missingFields.map(f => '<span class="missing">' + esc(f) + '</span>').join(', ') : '<span class="present">None</span>'}</div>
-        <div class="field"><strong>Created:</strong> ${new Date(r.createdAt).toLocaleString()}</div>
-        <div class="field"><strong>Original message:</strong></div>
-        <pre>${esc(r.originalMessage)}</pre>
+      <td colspan="5">
+        <div class="detail-grid">
+          <div class="detail-field"><div class="dl">What</div><div class="dv">${r.what ? esc(r.what) : '<span class="dv missing">—</span>'}</div></div>
+          <div class="detail-field"><div class="dl">Purpose</div><div class="dv">${r.purpose ? esc(r.purpose) : '<span class="dv missing">—</span>'}</div></div>
+          <div class="detail-field"><div class="dl">Deadline</div><div class="dv">${r.deadline ? esc(r.deadline) : '<span class="dv missing">—</span>'}</div></div>
+          <div class="detail-field"><div class="dl">Budget</div><div class="dv">${r.budgetRange ? esc(r.budgetRange) : '<span class="dv missing">—</span>'}</div></div>
+          <div class="detail-field"><div class="dl">Brand References</div><div class="dv">${r.brandReferences ? esc(r.brandReferences) : '<span class="dv missing">—</span>'}</div></div>
+          <div class="detail-field"><div class="dl">Missing Fields</div><div class="dv"><div class="chips">${r.missingFields.length ? r.missingFields.map(f => '<span class="chip warn">⚠ ' + esc(f) + '</span>').join('') : '<span class="chip ok">✓ None</span>'}</div></div></div>
+        </div>
+        <div style="margin-bottom:6px;font-size:11px;color:#999;">Original message</div>
+        <div class="detail-msg">${esc(r.originalMessage)}</div>
       </td>
-    </tr>
-  `).join('');
+    </tr>`;
+  }).join('');
 }
 
 function toggleDetail(id) {
   const el = document.getElementById('detail-' + id);
   el.classList.toggle('open');
+}
+
+function renderTimeline() {
+  const tl = document.getElementById('timeline');
+  if (!allRequests.length) {
+    tl.innerHTML = '<div class="tl-empty">No activity yet</div>';
+    return;
+  }
+
+  const items = [];
+  for (const r of allRequests.slice().reverse()) {
+    const time = new Date(r.createdAt);
+    items.push({
+      time,
+      text: `Email received from ${esc(r.clientEmail)}`,
+      dot: 'blue',
+    });
+    if (r.missingFields.length) {
+      items.push({
+        time: new Date(r.updatedAt),
+        text: `Missing info: ${r.missingFields.join(', ')}`,
+        dot: 'orange',
+      });
+    }
+    if (r.assignedTo) {
+      items.push({
+        time: new Date(r.updatedAt),
+        text: `Assigned to ${r.assignedTo}`,
+        dot: 'green',
+      });
+    }
+  }
+  items.sort((a, b) => b.time - a.time);
+  const recent = items.slice(0, 10);
+
+  tl.innerHTML = recent.map(item => {
+    const dotClass = item.dot;
+    return `<div class="tl-item">
+      <div class="tl-dot ${dotClass}">${dotClass === 'blue' ? '📨' : dotClass === 'orange' ? '⚠' : '✓'}</div>
+      <div class="tl-content">
+        <div class="tl-text">${item.text}</div>
+        <div class="tl-time">${item.time.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 function esc(s) {
