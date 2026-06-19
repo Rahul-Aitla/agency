@@ -34,8 +34,18 @@ async function findExisting(payload: InboundEmailPayload): Promise<DesignRequest
     const found = all.find(r => r.threadId === payload.inReplyTo);
     if (found) return found;
   }
-  const pending = findByEmail(payload.from, 'pending_info');
-  if (pending.length > 0) return pending[pending.length - 1];
+  const isReply = payload.subject?.toLowerCase().startsWith('re:') || payload.inReplyTo || payload.references;
+  if (isReply) {
+    const pending = findByEmail(payload.from, 'pending_info');
+    if (pending.length === 1) return pending[0];
+    if (pending.length > 1) {
+      const subjWords = (payload.subject || '').toLowerCase().split(/\s+/);
+      for (const req of pending) {
+        const whatWords = (req.what || '').toLowerCase().split(/\s+/);
+        if (whatWords.some(w => w.length > 2 && subjWords.includes(w))) return req;
+      }
+    }
+  }
   return undefined;
 }
 
@@ -91,7 +101,7 @@ async function processEmail(payload: InboundEmailPayload): Promise<DesignRequest
     const missing = getMissingFields(merged);
     updateRequest(req.id, { missingFields: missing });
     const pendingReq = getRequest(req.id)!;
-    try { await sendMissingInfoEmail(pendingReq, missing); } catch (e) { console.warn('Email send failed (SMTP not configured):', e); }
+    try { await sendMissingInfoEmail(pendingReq, missing, merged); } catch (e) { console.warn('Email send failed (SMTP not configured):', e); }
   }
 
   return getRequest(req.id)!;

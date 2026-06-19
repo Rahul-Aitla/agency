@@ -1,5 +1,5 @@
 import nodemailer from 'nodemailer';
-import { DesignRequest } from './types';
+import { DesignRequest, ParsedEmail } from './types';
 
 let transporter: nodemailer.Transporter | null = null;
 
@@ -18,22 +18,32 @@ function getTransporter(): nodemailer.Transporter {
   return transporter;
 }
 
-export async function sendMissingInfoEmail(req: DesignRequest, missingFields: string[]): Promise<void> {
-  const fieldList = missingFields.map(f => `• ${f}`).join('\n');
+
+export async function sendMissingInfoEmail(req: DesignRequest, missingFields: string[], parsed: ParsedEmail): Promise<void> {
+  let intro = '';
+  if (parsed.what && parsed.purpose) {
+    intro = `From your message, it sounds like you're looking for a ${parsed.what.toLowerCase()} for ${parsed.purpose.toLowerCase()}.`;
+  } else if (parsed.what) {
+    intro = `From your message, it sounds like you're looking for a ${parsed.what.toLowerCase()}.`;
+  } else {
+    intro = `Thanks for reaching out, ${req.clientName}!`;
+  }
+
+  const askList = missingFields.map(f => `• ${f}`).join('\n');
 
   const html = `
     <div style="font-family: sans-serif; max-width: 600px;">
-      <h2>Thanks for reaching out, ${req.clientName}!</h2>
-      <p>We're excited to help with your request. To get started, we just need a few more details:</p>
+      <p>${intro}</p>
+      <p>To prepare an accurate quote and timeline, could you share:</p>
       <ul>
         ${missingFields.map(f => `<li><strong>${f}</strong></li>`).join('')}
       </ul>
-      <p>Reply to this email with the missing info and we'll take it from there!</p>
+      <p>Reply to this email and we'll take it from there!</p>
       <p style="color: #666; font-size: 12px;">Request ID: ${req.id}</p>
     </div>
   `;
 
-  const text = `Thanks for reaching out, ${req.clientName}!\n\nWe're excited to help. To get started, we need:\n\n${fieldList}\n\nReply to this email with the missing info and we'll take it from there!\n\nRequest ID: ${req.id}`;
+  const text = `${intro}\n\nTo prepare an accurate quote and timeline, could you share:\n\n${askList}\n\nReply to this email and we'll take it from there!\n\nRequest ID: ${req.id}`;
 
   const info = await getTransporter().sendMail({
     from: `"Agency Bot" <${process.env.SMTP_USER}>`,

@@ -126,11 +126,11 @@ export async function parseEmail(text: string): Promise<ParsedEmail> {
 
 export function getMissingFields(parsed: ParsedEmail): string[] {
   const fieldLabels: Record<string, string> = {
-    what: 'What you want designed',
-    purpose: 'What it\'s for',
-    deadline: 'Your deadline',
-    brandReferences: 'Brand guidelines or references',
-    budgetRange: 'Your budget range',
+    deadline: 'Target launch date / deadline',
+    budgetRange: 'Budget range',
+    brandReferences: 'Brands or examples you\'d like us to reference',
+    what: 'What exactly you\'d like designed',
+    purpose: 'What this is for',
   };
 
   return requiredFields
