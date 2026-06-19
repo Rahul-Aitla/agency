@@ -36,12 +36,10 @@ function setupTrigger() {
  */
 function checkInbox() {
   const threads = GmailApp.search(`label:${LABEL_NAME} is:unread`);
-  // Also grab unread from inbox as fallback
-  const inboxThreads = GmailApp.getInboxThreads(0, 10);
 
   const seen = new Set();
 
-  for (const thread of [...threads, ...inboxThreads]) {
+  for (const thread of threads) {
     const msgs = thread.getMessages();
     for (const msg of msgs) {
       if (!msg.isUnread()) continue;

@@ -123,6 +123,19 @@ app.post('/webhook/email', async (req, res) => {
       references: req.body.references,
     };
 
+    if (!payload.text && !payload.subject) {
+      console.warn('[Webhook] Skipped empty payload from', from);
+      res.json({ success: true, skipped: true, reason: 'empty payload' });
+      return;
+    }
+
+    const bouncePatterns = [/mailer-daemon/i, /mail delivery subsystem/i, /postmaster/i, /noreply/i, /no-reply/i];
+    if (bouncePatterns.some(p => p.test(from))) {
+      console.warn('[Webhook] Skipped bounce/auto-reply from', from);
+      res.json({ success: true, skipped: true, reason: 'bounce' });
+      return;
+    }
+
     const result = await processEmail(payload);
     res.json({ success: true, requestId: result.id, status: result.status, assignedTo: result.assignedTo });
   } catch (err) {
@@ -192,7 +205,7 @@ app.get('/demo', (req, res) => {
 });
 
 async function main() {
-  app.listen(PORT, async () => {
+  app.listen(PORT, '0.0.0.0', async () => {
     console.log('='.repeat(56));
     console.log(`  Agency automation server running`);
     console.log('='.repeat(56));
