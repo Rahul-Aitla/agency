@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How It Works — Agency Bot</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f0f0f; color: #e0e0e0; padding: 32px; }
+  .container { max-width: 1000px; margin: 0 auto; }
+
+  h1 { font-size: 28px; color: #fff; margin-bottom: 8px; }
+  .subtitle { color: #888; margin-bottom: 40px; font-size: 15px; }
+  .subtitle a { color: #60a5fa; text-decoration: none; }
+  .subtitle a:hover { text-decoration: underline; }
+
+  /* Step cards */
+  .step { display: flex; gap: 24px; margin-bottom: 0; position: relative; }
+  .step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 27px;
+    top: 60px;
+    bottom: -40px;
+    width: 2px;
+    background: linear-gradient(to bottom, #333, #1a1a2e);
+  }
+
+  .step-number {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 18px;
+    flex-shrink: 0;
+    border: 2px solid;
+    background: #1a1a1a;
+  }
+  .step-1 .step-number { border-color: #f59e0b; color: #f59e0b; }
+  .step-2 .step-number { border-color: #3b82f6; color: #3b82f6; }
+  .step-3 .step-number { border-color: #8b5cf6; color: #8b5cf6; }
+  .step-4 .step-number { border-color: #10b981; color: #10b981; }
+  .step-5 .step-number { border-color: #ec4899; color: #ec4899; }
+
+  .step-content {
+    flex: 1;
+    padding-bottom: 48px;
+  }
+
+  .step-content h2 {
+    font-size: 18px;
+    color: #fff;
+    margin-bottom: 6px;
+  }
+  .step-content .desc {
+    color: #999;
+    font-size: 14px;
+    margin-bottom: 16px;
+  }
+
+  /* Cards */
+  .card {
+    background: #1a1a2e;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid #2a2a3e;
+    margin-bottom: 16px;
+  }
+  .card-title {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #666;
+    margin-bottom: 12px;
+  }
+
+  /* Email preview */
+  .email-preview {
+    background: #16213e;
+    border-radius: 8px;
+    padding: 16px;
+    border-left: 3px solid #f59e0b;
+  }
+  .email-preview .email-header { font-size: 12px; color: #888; margin-bottom: 8px; }
+  .email-preview .email-body { font-size: 14px; color: #ccc; line-height: 1.6; }
+
+  /* Field grid */
+  .field-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .field {
+    background: #12122a;
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid #2a2a3e;
+  }
+  .field .label { font-size: 11px; text-transform: uppercase; color: #666; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .field .value { font-size: 14px; color: #e0e0e0; }
+  .field .value.missing { color: #f59e0b; font-style: italic; }
+  .field .value.present { color: #4ade80; }
+
+  /* Tags */
+  .tag {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    margin: 2px;
+  }
+  .tag-yellow { background: #f59e0b22; color: #fbbf24; border: 1px solid #f59e0b44; }
+  .tag-green { background: #10b98122; color: #34d399; border: 1px solid #10b98144; }
+  .tag-blue { background: #3b82f622; color: #60a5fa; border: 1px solid #3b82f644; }
+  .tag-purple { background: #8b5cf622; color: #a78bfa; border: 1px solid #8b5cf644; }
+
+  /* Person card */
+  .person-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    padding: 12px;
+    background: #12122a;
+    border-radius: 8px;
+    border: 1px solid #2a2a3e;
+    margin-bottom: 8px;
+  }
+  .person-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .person-avatar.pink { background: #ec489922; color: #f472b6; }
+  .person-avatar.blue { background: #3b82f622; color: #60a5fa; }
+  .person-avatar.green { background: #10b98122; color: #34d399; }
+  .person-avatar.dim { opacity: 0.3; }
+  .person-info { flex: 1; }
+  .person-info .name { font-weight: 600; color: #e0e0e0; }
+  .person-info .role { font-size: 12px; color: #888; }
+  .person-assigned { font-size: 12px; color: #4ade80; font-weight: 600; }
+
+  /* Nav */
+  .nav-links { margin-bottom: 32px; }
+  .nav-links a {
+    color: #60a5fa;
+    text-decoration: none;
+    font-size: 14px;
+    margin-right: 16px;
+  }
+  .nav-links a:hover { text-decoration: underline; }
+
+  /* Cheers */
+  .cheers { margin-top: 24px; }
+
+  /* Console logs */
+  .console {
+    background: #0a0a0a;
+    border-radius: 8px;
+    padding: 16px;
+    font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+    font-size: 13px;
+    line-height: 1.8;
+    overflow-x: auto;
+    border: 1px solid #222;
+  }
+  .console .line { color: #888; }
+  .console .line.info { color: #60a5fa; }
+  .console .line.success { color: #4ade80; }
+  .console .line.warn { color: #fbbf24; }
+  .console .line .prompt { color: #666; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="nav-links">
+    <a href="/">← Dashboard</a>
+    <a href="/demo">How It Works</a>
+  </div>
+
+  <h1>⚙️ How It Works</h1>
+  <p class="subtitle">
+    Walk through what happens when a client sends an email.
+    ← Back to <a href="/">Dashboard</a>
+  </p>
+
+  <!-- Step 1 -->
+  <div class="step step-1">
+    <div class="step-number">1</div>
+    <div class="step-content">
+      <h2>📨 Email arrives</h2>
+      <p class="desc">Google Apps Script detects the new email and forwards it to your server</p>
+      <div class="card">
+        <div class="card-title">From Gmail Inbox</div>
+        <div class="email-preview">
+          <div class="email-header">From: client@coffeebrand.com &nbsp;|&nbsp; Subject: New logo design</div>
+          <div class="email-body">
+            "Hey, we need a logo for our new coffee brand. Something minimal and modern. We're thinking earthy tones. Let us know what you need from us!"
+          </div>
+        </div>
+      </div>
+      <div class="console">
+        <div class="line info"><span class="prompt">$</span> [Gmail] New email from client@coffeebrand.com</div>
+        <div class="line info"><span class="prompt">$</span> [Webhook] POST /webhook/email → 200 OK</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="step step-2">
+    <div class="step-number">2</div>
+    <div class="step-content">
+      <h2>🧠 AI parses the request</h2>
+      <p class="desc">Groq (LLaMA) extracts the 5 fields from the email — some are present, some are missing</p>
+      <div class="card">
+        <div class="card-title">Extracted Fields</div>
+        <div class="field-grid">
+          <div class="field">
+            <div class="label">What</div>
+            <div class="value present">Logo</div>
+          </div>
+          <div class="field">
+            <div class="label">Purpose</div>
+            <div class="value present">New coffee brand</div>
+          </div>
+          <div class="field">
+            <div class="label">Deadline</div>
+            <div class="value missing">— Not provided</div>
+          </div>
+          <div class="field">
+            <div class="label">Brand References</div>
+            <div class="value present">Minimal and modern, earthy tones</div>
+          </div>
+          <div class="field">
+            <div class="label">Budget Range</div>
+            <div class="value missing">— Not provided</div>
+          </div>
+        </div>
+      </div>
+      <div class="console">
+        <div class="line info"><span class="prompt">$</span> [Groq] Parsed email via llama-3.3-70b-versatile</div>
+        <div class="line warn"><span class="prompt">$</span> [Parse] Missing fields: deadline, budgetRange</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 3 -->
+  <div class="step step-3">
+    <div class="step-number">3</div>
+    <div class="step-content">
+      <h2>📧 Auto-reply for missing info</h2>
+      <p class="desc">The server sends a reply email asking only for what's missing</p>
+      <div class="card">
+        <div class="card-title">Outgoing Reply</div>
+        <div class="email-preview" style="border-left-color: #3b82f6;">
+          <div class="email-header">To: client@coffeebrand.com &nbsp;|&nbsp; Subject: A few more details needed</div>
+          <div class="email-body">
+            Thanks! To get started, we need:<br>
+            • <strong>Your deadline</strong><br>
+            • <strong>Your budget range</strong><br><br>
+            Reply to this email with the missing info and we'll take it from there!
+          </div>
+        </div>
+      </div>
+      <div class="console">
+        <div class="line info"><span class="prompt">$</span> [Email] Sent reply → client@coffeebrand.com</div>
+        <div class="line info"><span class="prompt">$</span> [Storage] Request saved (status: pending_info)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 4 -->
+  <div class="step step-4">
+    <div class="step-number">4</div>
+    <div class="step-content">
+      <h2>🔄 Client replies — fields are filled</h2>
+      <p class="desc">The client responds, Groq re-parses, and now all 5 fields are present</p>
+      <div class="card">
+        <div class="card-title">Client Reply → Re-parsed</div>
+        <div class="field-grid">
+          <div class="field">
+            <div class="label">What</div>
+            <div class="value present">Logo</div>
+          </div>
+          <div class="field">
+            <div class="label">Purpose</div>
+            <div class="value present">New coffee brand</div>
+          </div>
+          <div class="field">
+            <div class="label">Deadline</div>
+            <div class="value present">End of next month</div>
+          </div>
+          <div class="field">
+            <div class="label">Brand References</div>
+            <div class="value present">Minimal and modern, earthy tones</div>
+          </div>
+          <div class="field">
+            <div class="label">Budget Range</div>
+            <div class="value present">$1k–$2k</div>
+          </div>
+        </div>
+      </div>
+      <div class="console">
+        <div class="line info"><span class="prompt">$</span> [Webhook] Client reply received</div>
+        <div class="line info"><span class="prompt">$</span> [Groq] Re-parsed reply — all fields present</div>
+        <div class="line success"><span class="prompt">$</span> ✅ Request complete! Routing now...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 5 -->
+  <div class="step step-5">
+    <div class="step-number">5</div>
+    <div class="step-content">
+      <h2>🎯 Routed to the right person</h2>
+      <p class="desc">The system matches the request type to the correct team member</p>
+      <div class="card">
+        <div class="card-title">Routing Matches</div>
+
+        <div class="person-row">
+          <div class="person-avatar pink">P</div>
+          <div class="person-info">
+            <div class="name">Priya</div>
+            <div class="role">Brand Identity — logos, style guides</div>
+          </div>
+          <div class="person-assigned">← ASSIGNED</div>
+        </div>
+
+        <div class="person-row" style="opacity:0.4">
+          <div class="person-avatar blue dim">R</div>
+          <div class="person-info">
+            <div class="name">Riya</div>
+            <div class="role">Social media &amp; marketing creatives</div>
+          </div>
+          <div style="font-size:12px;color:#666;">No match</div>
+        </div>
+
+        <div class="person-row" style="opacity:0.4">
+          <div class="person-avatar green dim">S</div>
+          <div class="person-info">
+            <div class="name">Sameer</div>
+            <div class="role">Decks &amp; presentations</div>
+          </div>
+          <div style="font-size:12px;color:#666;">No match</div>
+        </div>
+
+        <div style="margin-top:16px;padding:12px;background:#12122a;border-radius:8px;border:1px solid #2a2a3e;">
+          <div style="font-size:12px;color:#888;margin-bottom:4px;">Why Priya?</div>
+          <div style="font-size:14px;color:#e0e0e0;">Request contains <span class="tag tag-yellow">logo</span> → matches Priya's keywords</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Notifications Sent</div>
+        <div class="console">
+          <div class="line success"><span class="prompt">→</span> priya@agency.com — "New design request: Logo for New coffee brand"</div>
+          <div class="line success"><span class="prompt">→</span> client@coffeebrand.com — "Your design request is in progress!"</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cheers" style="text-align:center;padding:40px 0;border-top:1px solid #2a2a3e;margin-top:16px;">
+    <div style="font-size:32px;margin-bottom:8px;">✅</div>
+    <div style="color:#888;font-size:14px;">
+      From email to assignment — fully automated. No human needed.
+    </div>
+    <div style="margin-top:16px;">
+      <a href="/" style="color:#60a5fa;">← Back to Dashboard</a>
+    </div>
+  </div>
+</div>
+</body>
+</html>

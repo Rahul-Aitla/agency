@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agency Bot - Demo</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f0f0f; color: #e0e0e0; min-height: 100vh; }
+  .container { max-width: 800px; margin: 0 auto; padding: 32px 24px; }
+
+  .nav { display: flex; gap: 16px; margin-bottom: 32px; }
+  .nav a { color: #60a5fa; text-decoration: none; font-size: 14px; }
+  .nav a:hover { text-decoration: underline; }
+
+  h1 { font-size: 24px; color: #fff; margin-bottom: 4px; }
+  .subtitle { color: #888; font-size: 14px; margin-bottom: 32px; }
+
+  .email-form { background: #1a1a2e; border-radius: 12px; border: 1px solid #2a2a3e; overflow: hidden; }
+  .form-field { border-bottom: 1px solid #2a2a3e; display: flex; }
+  .form-field:last-child { border-bottom: none; }
+  .form-label { width: 80px; padding: 14px 16px; color: #666; font-size: 13px; font-weight: 600; flex-shrink: 0; }
+  .form-field input, .form-field textarea {
+    flex: 1; background: transparent; border: none; outline: none;
+    color: #e0e0e0; font-size: 14px; padding: 14px 16px 14px 0; font-family: inherit;
+  }
+  .form-field textarea { min-height: 140px; resize: vertical; }
+  .form-field input::placeholder, .form-field textarea::placeholder { color: #555; }
+
+  .submit-bar { padding: 16px; display: flex; align-items: center; gap: 12px; }
+  .submit-btn {
+    padding: 10px 28px; background: #2563eb; color: #fff; border: none; border-radius: 8px;
+    font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.15s;
+  }
+  .submit-btn:hover { background: #1d4ed8; }
+  .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .submit-note { color: #666; font-size: 12px; }
+
+  /* Result card */
+  .result { display: none; margin-top: 32px; }
+
+  .step-card { background: #1a1a2e; border-radius: 12px; border: 1px solid #2a2a3e; padding: 20px; margin-bottom: 16px; }
+
+  /* Success/Error badges */
+  .badge {
+    display: inline-block; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 600;
+    border: 1px solid;
+  }
+  .badge.present { background: #10b98122; color: #34d399; border-color: #10b98144; }
+  .badge.missing { background: #f59e0b22; color: #fbbf24; border-color: #f59e0b44; }
+  .badge.status-pending { background: #f59e0b22; color: #fbbf24; border-color: #f59e0b44; }
+  .badge.status-routed { background: #10b98122; color: #34d399; border-color: #10b98144; }
+
+  .fields-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .field-item { padding: 12px; border-radius: 6px; border: 1px solid #2a2a3e; background: #12122a; }
+  .field-item .label { font-size: 11px; text-transform: uppercase; color: #666; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .field-item .value { font-size: 14px; }
+
+  /* Console log */
+  .log { background: #0a0a0a; border-radius: 8px; padding: 16px; font-family: 'SF Mono', Monaco, monospace; font-size: 13px; line-height: 1.8; border: 1px solid #222; }
+  .log .line { color: #888; }
+  .log .line.info { color: #60a5fa; }
+  .log .line.success { color: #4ade80; }
+  .log .line.warn { color: #fbbf24; }
+  .log .line .prompt { color: #555; }
+
+  /* Spinner */
+  .spinner { display: none; width: 18px; height: 18px; border: 2px solid #333; border-top-color: #60a5fa; border-radius: 50%; animation: spin 0.6s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading .spinner { display: inline-block; }
+  .loading .btn-text { display: none; }
+
+  /* Routing */
+  .routing-card { display: flex; align-items: center; gap: 12px; padding: 14px; background: #12122a; border-radius: 8px; border: 1px solid #2a2a3e; margin-top: 8px; }
+  .avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; flex-shrink: 0; }
+  .avatar.pink { background: #ec489922; color: #f472b6; }
+  .avatar.blue { background: #3b82f622; color: #60a5fa; }
+  .avatar.green { background: #10b98122; color: #34d399; }
+  .routing-info { flex: 1; }
+  .routing-info .name { font-weight: 600; }
+  .routing-info .reason { font-size: 12px; color: #888; }
+  .routing-badge { font-size: 12px; color: #4ade80; font-weight: 600; }
+
+  /* Missing fields list */
+  .missing-list { margin-top: 12px; }
+  .missing-item { padding: 8px 12px; background: #12122a; border-radius: 6px; border: 1px solid #f59e0b33; margin-bottom: 6px; font-size: 13px; color: #fbbf24; }
+
+  /* Thread / Reply area */
+  .thread { margin-top: 12px; }
+  .thread-msg { padding: 12px; background: #12122a; border-radius: 8px; border: 1px solid #2a2a3e; margin-bottom: 8px; font-size: 13px; }
+  .thread-msg .meta { color: #888; font-size: 11px; margin-bottom: 4px; }
+  .thread-msg .body { color: #ccc; line-height: 1.5; }
+
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="nav">
+    <a href="/">Dashboard</a>
+    <a href="/demo">How It Works</a>
+    <a href="/demo">New Request</a>
+  </div>
+
+  <h1>How It Works</h1>
+  <p class="subtitle">Fill this in like an email — the AI extracts the 5 fields automatically, finds what's missing, and routes the complete request</p>
+
+  <div class="email-form">
+    <div class="form-field">
+      <div class="form-label">From</div>
+      <input type="email" id="fromEmail" placeholder="client@example.com" value="client@coffeebrand.com">
+    </div>
+    <div class="form-field">
+      <div class="form-label">Subject</div>
+      <input type="text" id="subject" placeholder="What is this about?" value="New logo for our coffee brand">
+    </div>
+    <div class="form-field">
+      <div class="form-label">Message</div>
+      <textarea id="message" placeholder="Describe what you need designed...">Hey, we need a logo for our new coffee brand. Something minimal and modern. We're thinking earthy tones. Let us know what you need from us!</textarea>
+    </div>
+    <div class="submit-bar">
+      <button class="submit-btn" id="submitBtn" onclick="submit()">
+        <span class="btn-text">Send Request</span>
+        <span class="spinner"></span>
+      </button>
+      <span class="submit-note">The system will parse, check, and route automatically</span>
+    </div>
+  </div>
+
+  <div class="result" id="result">
+    <div class="step-card">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+        <span style="font-size:20px;">🧠</span>
+        <div>
+          <div style="font-weight:600;color:#fff;">Parsed Fields</div>
+          <div style="font-size:12px;color:#888;" id="parsedBy"></div>
+        </div>
+        <div style="margin-left:auto;">
+          <span class="badge" id="statusBadge"></span>
+        </div>
+      </div>
+      <div class="fields-grid" id="fieldsGrid"></div>
+    </div>
+
+    <div id="missingSection" class="hidden">
+      <div class="step-card">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <span style="font-size:20px;">📧</span>
+          <div>
+            <div style="font-weight:600;color:#fff;">Auto-reply sent</div>
+            <div style="font-size:12px;color:#888;">The system replied asking for what's missing</div>
+          </div>
+        </div>
+        <div class="missing-list" id="missingList"></div>
+        <div style="margin-top:12px;padding:12px;background:#12122a;border-radius:8px;border:1px solid #2a2a3e;">
+          <div style="font-size:13px;color:#888;margin-bottom:8px;">Simulate the client replying with missing info:</div>
+          <textarea id="replyText" placeholder="Type the missing details as the client would reply..." style="width:100%;background:#0a0a0a;border:1px solid #2a2a3e;border-radius:6px;padding:10px;color:#e0e0e0;font-family:inherit;font-size:13px;min-height:80px;resize:vertical;outline:none;"></textarea>
+          <button class="submit-btn" style="margin-top:8px;" onclick="sendReply()">Send Reply</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="routingSection" class="hidden">
+      <div class="step-card">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <span style="font-size:20px;">🎯</span>
+          <div>
+            <div style="font-weight:600;color:#fff;">Routed</div>
+            <div style="font-size:12px;color:#888;">Request assigned to the right person</div>
+          </div>
+        </div>
+        <div class="routing-card" id="routingCard"></div>
+      </div>
+    </div>
+
+    <div class="log" id="log"></div>
+  </div>
+</div>
+
+<script>
+let currentRequestId = null;
+let currentEmail = '';
+
+async function submit() {
+  const btn = document.getElementById('submitBtn');
+  btn.classList.add('loading');
+  btn.disabled = true;
+
+  currentEmail = document.getElementById('fromEmail').value;
+
+  const body = {
+    email: currentEmail,
+    subject: document.getElementById('subject').value,
+    message: document.getElementById('message').value,
+  };
+
+  try {
+    const res = await fetch('http://localhost:3000/api/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'Failed');
+    currentRequestId = data.requestId;
+    showResult(data);
+  } catch (err) {
+    alert('Error: ' + err.message);
+  } finally {
+    btn.classList.remove('loading');
+    btn.disabled = false;
+  }
+}
+
+async function sendReply() {
+  const text = document.getElementById('replyText').value;
+  if (!text.trim()) return;
+
+  const body = {
+    email: currentEmail,
+    subject: 'Re: ' + document.getElementById('subject').value,
+    message: text,
+  };
+
+  try {
+    const res = await fetch('http://localhost:3000/api/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'Failed');
+    showResult(data);
+    document.getElementById('replyText').value = '';
+  } catch (err) {
+    alert('Error: ' + err.message);
+  }
+}
+
+function showResult(data) {
+  const result = document.getElementById('result');
+  result.style.display = 'block';
+
+  const parsed = data.parsed || {};
+
+  // Status badge
+  const badge = document.getElementById('statusBadge');
+  if (data.status === 'routed') {
+    badge.className = 'badge status-routed';
+    badge.textContent = 'Routed';
+  } else {
+    badge.className = 'badge status-pending';
+    badge.textContent = 'Pending Info';
+  }
+
+  // Parsed by
+  document.getElementById('parsedBy').textContent = 'via Groq AI (llama-3.3-70b)';
+
+  // Fields grid
+  const fields = [
+    { label: 'What', key: 'what' },
+    { label: 'Purpose', key: 'purpose' },
+    { label: 'Deadline', key: 'deadline' },
+    { label: 'Brand References', key: 'brandReferences' },
+    { label: 'Budget Range', key: 'budgetRange' },
+  ];
+  document.getElementById('fieldsGrid').innerHTML = fields.map(f => {
+    const val = parsed[f.key];
+    const present = val && val !== 'null';
+    return `<div class="field-item">
+      <div class="label">${f.label}</div>
+      <div class="value"><span class="badge ${present ? 'present' : 'missing'}">${present ? val : '— Not provided'}</span></div>
+    </div>`;
+  }).join('');
+
+  // Missing section
+  const missingSection = document.getElementById('missingSection');
+  const routingSection = document.getElementById('routingSection');
+  const missingList = document.getElementById('missingList');
+
+  if (data.status === 'routed') {
+    missingSection.classList.add('hidden');
+    routingSection.classList.remove('hidden');
+
+    const card = document.getElementById('routingCard');
+    const assignee = data.routing?.assignedTo || 'Unknown';
+    const details = getPersonDetails(assignee);
+    card.innerHTML = `
+      <div class="avatar ${details.color}">${details.initial}</div>
+      <div class="routing-info">
+        <div class="name">${assignee}</div>
+        <div class="reason">${details.role}</div>
+      </div>
+      <div class="routing-badge">ASSIGNED</div>
+    `;
+  } else {
+    routingSection.classList.add('hidden');
+    if (data.missingFields && data.missingFields.length) {
+      missingSection.classList.remove('hidden');
+      missingList.innerHTML = data.missingFields.map(f =>
+        `<div class="missing-item">✗ ${f}</div>`
+      ).join('');
+    } else {
+      missingSection.classList.add('hidden');
+    }
+  }
+
+  // Log
+  const log = document.getElementById('log');
+  const lines = [
+    `<span class="prompt">$</span> <span class="info">[Parse] Processing email from ${escHtml(data.parsed?.clientName || currentEmail)}</span>`,
+    `<span class="prompt">$</span> <span class="info">[Groq] Extracted fields via AI parsing</span>`,
+  ];
+  if (data.status === 'routed') {
+    lines.push(`<span class="prompt">$</span> <span class="success">[Route] All 5 fields present → assigned to ${data.routing?.assignedTo}</span>`);
+  } else {
+    lines.push(`<span class="prompt">$</span> <span class="warn">[Check] Missing ${data.missingFields?.length || 0} field(s) — auto-reply sent</span>`);
+  }
+  log.innerHTML = lines.join('\n');
+}
+
+function getPersonDetails(name) {
+  const people = {
+    Priya: { color: 'pink', initial: 'P', role: 'Brand Identity — logos, style guides' },
+    Riya: { color: 'blue', initial: 'R', role: 'Social media & marketing creatives' },
+    Sameer: { color: 'green', initial: 'S', role: 'Decks & presentations' },
+  };
+  return people[name] || { color: 'pink', initial: '?', role: '' };
+}
+
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+</script>
+</body>
+</html>
