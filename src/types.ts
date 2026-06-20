@@ -9,7 +9,7 @@ export interface DesignRequest {
   brandReferences: string | null;
   budgetRange: string | null;
   missingFields: string[];
-  status: 'pending_info' | 'ready' | 'routed';
+  status: 'pending_info' | 'ready' | 'routed' | 'irrelevant';
   threadId?: string;
   assignedTo?: string;
   createdAt: Date;
